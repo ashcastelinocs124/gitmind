@@ -8,6 +8,7 @@ AI summaries, and outputs results in terminal or JSON format.
 import os
 import typer
 from rich.console import Console
+from github import GithubException
 from github_analyzer.fetcher import GitHubFetcher
 from github_analyzer.scorer import score_contributor
 from github_analyzer.summarizer import generate_summaries
@@ -47,9 +48,16 @@ def analyze(
 
     repo_name = _parse_repo(repo)
 
-    with console.status("[bold green]Fetching data from GitHub...") as status:
-        fetcher = GitHubFetcher(token=token)
-        contributor_stats = fetcher.fetch(repo_name, days=days)
+    try:
+        with console.status("[bold green]Fetching data from GitHub..."):
+            fetcher = GitHubFetcher(token=token)
+            contributor_stats = fetcher.fetch(repo_name, days=days)
+    except GithubException as e:
+        console.print(f"[red]GitHub API error: {e.data.get('message', 'Unknown error') if hasattr(e, 'data') and e.data else e}[/red]")
+        raise typer.Exit(code=1)
+    except Exception:
+        console.print("[red]Failed to fetch data from GitHub. Check your token and repo URL.[/red]")
+        raise typer.Exit(code=1)
 
     if not contributor_stats:
         console.print("[yellow]No contributors found in the specified period.[/yellow]")
@@ -66,8 +74,11 @@ def analyze(
     if not no_ai:
         api_key = os.environ.get("OPENAI_API_KEY")
         if api_key:
-            with console.status("[bold green]Generating AI summaries..."):
-                generate_summaries(reports, api_key=api_key)
+            try:
+                with console.status("[bold green]Generating AI summaries..."):
+                    generate_summaries(reports, api_key=api_key)
+            except Exception:
+                console.print("[yellow]Warning: AI summary generation failed. Showing scores only.[/yellow]")
         else:
             console.print("[dim]Skipping AI summaries (OPENAI_API_KEY not set)[/dim]")
 

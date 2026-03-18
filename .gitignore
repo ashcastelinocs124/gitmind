@@ -1,6 +1,12 @@
 __pycache__/
 *.egg-info/
 .env
+.env.*
+.env.local
 dist/
 build/
 *.pyc
+*.pem
+*.key
+credentials.json
+secrets.*
