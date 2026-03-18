@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "github-analyzer"
+version = "0.1.0"
+description = "Analyze GitHub contributors and grade developer effectiveness"
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.9.0",
+    "pygithub>=2.1.0",
+    "rich>=13.0.0",
+    "openai>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-mock>=3.0.0",
+]
+
+[project.scripts]
+github-analyzer = "github_analyzer.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["github_analyzer*"]
