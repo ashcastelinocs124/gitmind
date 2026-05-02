@@ -72,7 +72,7 @@ class GitHubFetcher:
                     date=commit.commit.author.date.isoformat(),
                     additions=commit.stats.additions,
                     deletions=commit.stats.deletions,
-                    files_changed=len(commit.files),
+                    files_changed=len(list(commit.files)),
                     author=login,
                 )
             )
